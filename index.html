@@ -1,0 +1,2717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanji N5 App</title>
+  <style>
+    :root {
+      --black: #171717;
+      --paper: #F7F7F5;
+      --white: #FFFFFF;
+      --soft: #E9EDF3;
+      --yellow: #FFF8C9;
+      --red: #B7312C;
+      --gold: #B99A53;
+      --ink: #1A1A1A;
+      --muted: #555555;
+      --line: #171717;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Yu Gothic", "Hiragino Sans", "Noto Sans JP", Arial, Helvetica, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--paper);
+      text-align: center;
+      border-bottom: 2px solid var(--line);
+      padding: 30px 18px 26px;
+    }
+
+    .tag {
+      display: inline-block;
+      position: relative;
+      padding: 10px 28px;
+      margin-bottom: 16px;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border-top: 3px solid var(--line);
+      border-bottom: 3px solid var(--line);
+    }
+
+    .tag::before,
+    .tag::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      width: 3px;
+      height: 34px;
+      background: var(--line);
+    }
+
+    .tag::before {
+      left: -10px;
+    }
+
+    .tag::after {
+      right: -10px;
+    }
+
+    h1 {
+      display: none;
+    }
+
+    .subtitle {
+      margin: 0 auto;
+      max-width: 760px;
+      font-size: 12px;
+      line-height: 1.8;
+      letter-spacing: 0.36em;
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .subtitle::before {
+      content: "A JLPT N5 flashcard library featuring 100 essential kanji designs";
+    }
+
+    .subtitle {
+      font-size: 0;
+    }
+
+    .subtitle::before {
+      font-size: 12px;
+    }
+
+    .stats {
+      display: none;
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      background: rgba(247, 247, 245, 0.96);
+      border-bottom: 1.5px solid var(--line);
+      margin-bottom: 34px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.04);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+
+    body.scrolled .controls {
+      width: min(960px, calc(100% - 24px));
+      margin: 10px auto 26px;
+      border: 1.5px solid var(--line);
+      box-shadow: 5px 5px 0 var(--black);
+    }
+
+    .controls::after {
+      content: "";
+      position: absolute;
+      left: var(--active-left, 0px);
+      bottom: -1.5px;
+      width: var(--active-width, 64px);
+      height: 2px;
+      background: var(--yellow);
+      z-index: 2;
+      transition: left 0.25s ease, width 0.25s ease;
+    }
+
+    .menu-item,
+    .searchToggle {
+      min-height: 56px;
+      border: 0;
+      border-right: 1px solid rgba(0,0,0,0.08);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 22px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, min-height 0.25s ease, padding 0.25s ease, font-size 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .menu-item:hover,
+    .searchToggle:hover {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    body.scrolled .menu-item,
+    body.scrolled .searchToggle {
+      min-height: 44px;
+      padding: 0 16px;
+      font-size: 12px;
+    }
+
+    .searchBox {
+      display: flex;
+      align-items: stretch;
+      position: relative;
+      background: var(--paper);
+    }
+
+    .searchToggle {
+      width: 58px;
+      padding: 0;
+      font-size: 23px;
+      line-height: 1;
+      border-left: 1px solid rgba(0,0,0,0.08);
+    }
+
+    body.scrolled .searchToggle {
+      width: 46px;
+      font-size: 19px;
+      padding: 0;
+    }
+
+    input {
+      width: 0;
+      min-width: 0;
+      min-height: 56px;
+      border: 0;
+      outline: none;
+      background: var(--soft);
+      color: var(--ink);
+      padding: 0;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      transition: width 0.25s ease, opacity 0.2s ease, padding 0.25s ease, min-height 0.25s ease, font-size 0.25s ease;
+    }
+
+    .searchBox.open input {
+      width: min(320px, 32vw);
+      padding: 0 18px;
+      opacity: 1;
+      pointer-events: auto;
+      border-left: 1px solid rgba(0,0,0,0.08);
+    }
+
+    input::placeholder {
+      color: var(--ink);
+      opacity: 0.72;
+    }
+
+    body.scrolled input {
+      min-height: 44px;
+      font-size: 12px;
+    }
+
+    body.scrolled .searchBox.open input {
+      width: min(260px, 30vw);
+      padding: 0 14px;
+    }
+
+    .homeSection,
+    .flashCardsSection {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .homeCard {
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--black);
+      padding: clamp(28px, 5vw, 56px);
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .homeLabel {
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .homeCard h2 {
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: 0.9;
+      letter-spacing: -0.07em;
+      max-width: 720px;
+    }
+
+    .homeCard p {
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 520px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .homeCard button {
+      min-height: 52px;
+      background: var(--black);
+      color: var(--white);
+      border: 0;
+      padding: 0 22px;
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .sectionTitle {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1.5px solid var(--line);
+      padding-bottom: 12px;
+    }
+
+    .sectionTitle span {
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: 0.18em;
+    }
+
+    .sectionTitle p {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+      max-width: 520px;
+      line-height: 1.45;
+      margin-top: 6px;
+    }
+
+    .flashSubmenu {
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-end;
+      border: 1.5px solid var(--line);
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--black);
+      flex: 0 0 auto;
+    }
+
+    .sub-item {
+      min-height: 38px;
+      border: 0;
+      border-right: 1px solid rgba(0,0,0,0.12);
+      background: var(--white);
+      color: var(--ink);
+      padding: 0 14px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .sub-item:last-child {
+      border-right: 0;
+    }
+
+    .sub-item:hover,
+    .sub-item.active {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .grid {
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      height: 308px;
+      perspective: 1000px;
+    }
+
+    .inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(.2,.8,.2,1);
+      transform-style: preserve-3d;
+      transform-origin: center center;
+    }
+
+    .card.flipped .inner {
+      transform: rotateY(180deg);
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--black);
+      padding: 18px;
+    }
+
+    .front {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--ink);
+      position: relative;
+      padding: 30px 18px 62px;
+    }
+
+    .front::before {
+      content: "KANJI";
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+    }
+
+    .front::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 54px;
+      height: 54px;
+      background: var(--yellow);
+      border-left: 1.8px solid var(--line);
+      border-bottom: 1.8px solid var(--line);
+    }
+
+    .back {
+      transform: rotateY(180deg);
+      background: var(--black);
+      color: var(--white);
+      padding: 22px;
+      justify-content: space-between;
+      align-items: stretch;
+    }
+
+    .back::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 54px;
+      height: 54px;
+      background: var(--red);
+      border-left: 1.8px solid var(--white);
+      border-bottom: 1.8px solid var(--white);
+    }
+
+    .number {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 2;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+    }
+
+    .kanji {
+      font-size: 96px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: -0.08em;
+      color: var(--ink);
+      margin: auto 0;
+      padding: 18px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 150px;
+      width: 100%;
+    }
+
+    .hint {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      padding-top: 14px;
+      border-top: 1.5px solid var(--line);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: linear-gradient(to bottom, rgba(247,247,245,0), rgba(247,247,245,0.9) 30%, rgba(247,247,245,1) 100%);
+    }
+
+    .romaji {
+      color: var(--yellow);
+      font-weight: 950;
+      font-size: 21px;
+      line-height: 1.15;
+      letter-spacing: 0.02em;
+      padding-right: 42px;
+      position: relative;
+      z-index: 1;
+      min-height: 24px;
+    }
+
+    .reading {
+      color: rgba(255,255,255,0.74);
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 1.25;
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+      min-height: 32px;
+    }
+
+    .meaning {
+      font-size: 20px;
+      font-weight: 950;
+      line-height: 1.15;
+      margin: 12px 0;
+      position: relative;
+      z-index: 1;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+    }
+
+    .example {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.24);
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.38;
+      position: relative;
+      z-index: 1;
+      min-height: 92px;
+      max-height: 104px;
+      overflow: hidden;
+    }
+
+    .example strong {
+      color: var(--yellow);
+    }
+
+    .quizSection {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .quizActions {
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-end;
+      border: 1.5px solid var(--line);
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--black);
+      flex: 0 0 auto;
+    }
+
+    .quizHero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: stretch;
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--black);
+      padding: clamp(22px, 4vw, 42px);
+      margin-bottom: 24px;
+    }
+
+    .quizHero h2 {
+      font-size: clamp(36px, 6vw, 74px);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      margin: 14px 0;
+    }
+
+    .quizHero p {
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.55;
+      max-width: 680px;
+    }
+
+    .scoreBox {
+      min-width: 170px;
+      background: var(--yellow);
+      border: 1.8px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 18px;
+    }
+
+    .scoreBox strong {
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .scoreBox span {
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .quizGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 18px;
+    }
+
+    .questionCard {
+      background: var(--white);
+      border: 1.8px solid var(--line);
+      box-shadow: 5px 5px 0 var(--black);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    .questionCard.correct {
+      outline: 3px solid #83C66B;
+      outline-offset: -6px;
+    }
+
+    .questionCard.wrong {
+      outline: 3px solid var(--red);
+      outline-offset: -6px;
+    }
+
+    .questionTop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1.5px solid var(--line);
+      padding-bottom: 10px;
+    }
+
+    .questionNumber {
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .questionStatus {
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .questionText {
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 850;
+      min-height: 64px;
+    }
+
+    .kanjiTarget {
+      display: inline;
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 5px;
+      text-decoration-color: var(--red);
+      font-weight: 950;
+      background: var(--yellow);
+      padding: 0 4px;
+    }
+
+    .questionPrompt {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .optionLabel {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      align-items: center;
+      gap: 10px;
+      border: 1.2px solid rgba(0,0,0,0.16);
+      padding: 10px;
+      cursor: pointer;
+      font-weight: 850;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .optionLabel:hover {
+      background: var(--soft);
+      border-color: var(--line);
+    }
+
+    .optionLabel input {
+      width: 18px;
+      min-height: 18px;
+      opacity: 1;
+      pointer-events: auto;
+      accent-color: var(--black);
+      padding: 0;
+    }
+
+    .optionLabel.correctAnswer {
+      background: #E9F7E4;
+      border-color: #83C66B;
+    }
+
+    .optionLabel.wrongAnswer {
+      background: #FBE1DD;
+      border-color: var(--red);
+    }
+
+    .answerFeedback {
+      min-height: 18px;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .empty {
+      width: min(760px, calc(100% - 36px));
+      margin: 20px auto;
+      text-align: center;
+      color: var(--muted);
+      display: none;
+      font-weight: 800;
+    }
+
+    footer {
+      width: min(1180px, calc(100% - 36px));
+      margin: 34px auto 0;
+      border-top: 1.5px solid var(--line);
+      padding: 18px 0 34px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 880px) {
+      .controls {
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .controls::-webkit-scrollbar {
+        display: none;
+      }
+
+      .menu-item,
+      .searchToggle {
+        min-height: 48px;
+        font-size: 12px;
+        padding: 0 14px;
+      }
+
+      .searchToggle {
+        width: 48px;
+        font-size: 18px;
+        padding: 0;
+      }
+
+      .searchBox {
+        flex: 0 0 auto;
+      }
+
+      .searchBox.open input {
+        width: 210px;
+        min-height: 48px;
+      }
+
+      body.scrolled .controls {
+        width: calc(100% - 18px);
+        margin-top: 8px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      header {
+        padding: 26px 14px 22px;
+      }
+
+      .tag {
+        font-size: 18px;
+        letter-spacing: 0.14em;
+      }
+
+      .subtitle::before {
+        font-size: 10px;
+        letter-spacing: 0.22em;
+      }
+
+      .sectionTitle {
+        display: block;
+      }
+
+      .sectionTitle p {
+        text-align: left;
+        margin-top: 8px;
+      }
+
+      .flashSubmenu,
+      .quizActions {
+        margin-top: 14px;
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .quizHero {
+        grid-template-columns: 1fr;
+      }
+
+      .scoreBox {
+        min-width: 100%;
+      }
+
+      .sub-item {
+        flex: 1 0 auto;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        height: 265px;
+      }
+
+      .front {
+        padding: 28px 16px 58px;
+      }
+
+      .kanji {
+        font-size: 82px;
+        min-height: 132px;
+        padding: 16px 0 8px;
+      }
+    }
+  </style>
+
+  <meta name="theme-color" content="#171717" />
+  <meta name="description" content="Aplicativo de estudo de kanji JLPT N5 com flashcards e teste." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+</head>
+<body>
+  <header>
+    <span class="tag">KANJI LIBRARY</span>
+    <h1>Flashcards N5</h1>
+    <p class="subtitle">Deck visual de 100 kanjis N5 inspirado em banners japoneses: composição limpa, contraste forte, tipografia grande e cards fáceis de revisar.</p>
+    <div class="stats">
+      <span class="pill">100 kanjis</span>
+      <span class="pill">Japonês + Romaji + Português</span>
+      <span class="pill">Busca rápida</span>
+    </div>
+  </header>
+
+  <section class="controls" id="menuBar">
+    <button class="menu-item" type="button" onclick="goHome()">Home</button>
+    <button class="menu-item active" type="button" onclick="showFlashCards()">Flash Cards</button>
+    <button class="menu-item" type="button" onclick="showQuiz()">Teste</button>
+
+    <div class="searchBox" id="searchBox">
+      <button class="searchToggle" type="button" onclick="toggleSearch()" aria-label="Abrir busca">⌕</button>
+      <input id="searchInput" type="search" placeholder="SEARCH" oninput="filterCards()" />
+    </div>
+  </section>
+
+  <main>
+    <section class="homeSection" id="homeSection" hidden>
+      <div class="homeCard">
+        <span class="homeLabel">JLPT N5</span>
+        <h2>Biblioteca de estudo</h2>
+        <p>Use o menu <strong>Flash Cards</strong> para revisar os 100 kanjis básicos do N5.</p>
+        <button type="button" onclick="showFlashCards()">Abrir Flash Cards</button>
+      </div>
+    </section>
+
+    <section class="flashCardsSection" id="flashCardsSection">
+      <div class="sectionTitle">
+        <div>
+          <span>FLASH CARDS</span>
+          <p>100 kanjis essenciais para revisar leitura, romaji, significado e exemplos.</p>
+        </div>
+
+        <div class="flashSubmenu">
+          <button class="sub-item active" type="button" onclick="sortByNumber()">Número</button>
+          <button class="sub-item" type="button" onclick="shuffleCards()">Embaralhar</button>
+          <button class="sub-item" type="button" onclick="resetCards()">Virar todos</button>
+        </div>
+      </div>
+      <div class="grid" id="cardGrid"></div>
+      <p class="empty" id="emptyMessage">Nenhum kanji encontrado nessa busca.</p>
+    </section>
+
+    <section class="quizSection" id="quizSection" hidden>
+      <div class="sectionTitle">
+        <div>
+          <span>TESTE</span>
+          <p>Prova de leitura de kanji baseada no PDF enviado. Escolha uma alternativa por questão e corrija no final.</p>
+        </div>
+
+        <div class="quizActions">
+          <button class="sub-item" type="button" onclick="resetQuiz()">Limpar</button>
+          <button class="sub-item active" type="button" onclick="checkQuiz()">Corrigir</button>
+        </div>
+      </div>
+
+      <div class="quizHero">
+        <div>
+          <span class="homeLabel">KANJI TEST</span>
+          <h2>Teste de conhecimento</h2>
+          <p>São 50 questões. Cada pergunta vale 1 ponto. Depois de corrigir, você verá a pontuação e as respostas corretas.</p>
+        </div>
+        <div class="scoreBox" id="scoreBox">
+          <strong>0/50</strong>
+          <span>aguardando correção</span>
+        </div>
+      </div>
+
+      <form class="quizGrid" id="quizGrid"></form>
+    </section>
+  </main>
+
+  <footer>
+    Mini site de revisão para JLPT N5. Dica: revise 10 kanjis por dia e use a busca para repetir os mais difíceis.
+  </footer>
+
+  <script>
+    const flashcards = [
+      {
+            "kanji": "日",
+            "reading": "にち / ひ",
+            "romaji": "nichi / hi",
+            "pt": "dia / sol",
+            "example": "日本",
+            "exampleRomaji": "Nihon",
+            "examplePt": "Japão"
+      },
+      {
+            "kanji": "一",
+            "reading": "いち / ひと",
+            "romaji": "ichi / hito",
+            "pt": "um",
+            "example": "一つ",
+            "exampleRomaji": "hitotsu",
+            "examplePt": "um item"
+      },
+      {
+            "kanji": "国",
+            "reading": "こく / くに",
+            "romaji": "koku / kuni",
+            "pt": "país",
+            "example": "国",
+            "exampleRomaji": "kuni",
+            "examplePt": "país"
+      },
+      {
+            "kanji": "人",
+            "reading": "じん / ひと",
+            "romaji": "jin / hito",
+            "pt": "pessoa",
+            "example": "日本人",
+            "exampleRomaji": "Nihonjin",
+            "examplePt": "japonês / pessoa japonesa"
+      },
+      {
+            "kanji": "年",
+            "reading": "ねん / とし",
+            "romaji": "nen / toshi",
+            "pt": "ano",
+            "example": "今年",
+            "exampleRomaji": "kotoshi",
+            "examplePt": "este ano"
+      },
+      {
+            "kanji": "大",
+            "reading": "だい / おお",
+            "romaji": "dai / oo",
+            "pt": "grande",
+            "example": "大学",
+            "exampleRomaji": "daigaku",
+            "examplePt": "universidade"
+      },
+      {
+            "kanji": "十",
+            "reading": "じゅう / とお",
+            "romaji": "juu / too",
+            "pt": "dez",
+            "example": "十月",
+            "exampleRomaji": "juugatsu",
+            "examplePt": "outubro"
+      },
+      {
+            "kanji": "二",
+            "reading": "に / ふた",
+            "romaji": "ni / futa",
+            "pt": "dois",
+            "example": "二人",
+            "exampleRomaji": "futari",
+            "examplePt": "duas pessoas"
+      },
+      {
+            "kanji": "本",
+            "reading": "ほん / もと",
+            "romaji": "hon / moto",
+            "pt": "livro / origem",
+            "example": "本",
+            "exampleRomaji": "hon",
+            "examplePt": "livro"
+      },
+      {
+            "kanji": "中",
+            "reading": "ちゅう / なか",
+            "romaji": "chuu / naka",
+            "pt": "dentro / meio",
+            "example": "中",
+            "exampleRomaji": "naka",
+            "examplePt": "dentro"
+      },
+      {
+            "kanji": "長",
+            "reading": "ちょう / なが",
+            "romaji": "chou / naga",
+            "pt": "longo / chefe",
+            "example": "長い",
+            "exampleRomaji": "nagai",
+            "examplePt": "longo"
+      },
+      {
+            "kanji": "出",
+            "reading": "しゅつ / で",
+            "romaji": "shutsu / de",
+            "pt": "sair",
+            "example": "出口",
+            "exampleRomaji": "deguchi",
+            "examplePt": "saída"
+      },
+      {
+            "kanji": "三",
+            "reading": "さん / みっ",
+            "romaji": "san / mi",
+            "pt": "três",
+            "example": "三つ",
+            "exampleRomaji": "mittsu",
+            "examplePt": "três itens"
+      },
+      {
+            "kanji": "時",
+            "reading": "じ / とき",
+            "romaji": "ji / toki",
+            "pt": "hora / tempo",
+            "example": "時間",
+            "exampleRomaji": "jikan",
+            "examplePt": "tempo / horário"
+      },
+      {
+            "kanji": "行",
+            "reading": "こう / い",
+            "romaji": "kou / i",
+            "pt": "ir",
+            "example": "行きます",
+            "exampleRomaji": "ikimasu",
+            "examplePt": "vou"
+      },
+      {
+            "kanji": "見",
+            "reading": "けん / み",
+            "romaji": "ken / mi",
+            "pt": "ver / olhar",
+            "example": "見ます",
+            "exampleRomaji": "mimasu",
+            "examplePt": "vejo / olho"
+      },
+      {
+            "kanji": "月",
+            "reading": "げつ / つき",
+            "romaji": "getsu / tsuki",
+            "pt": "lua / mês",
+            "example": "月曜日",
+            "exampleRomaji": "getsuyoubi",
+            "examplePt": "segunda-feira"
+      },
+      {
+            "kanji": "後",
+            "reading": "ご / あと",
+            "romaji": "go / ato",
+            "pt": "depois / atrás",
+            "example": "午後",
+            "exampleRomaji": "gogo",
+            "examplePt": "tarde / PM"
+      },
+      {
+            "kanji": "前",
+            "reading": "ぜん / まえ",
+            "romaji": "zen / mae",
+            "pt": "antes / frente",
+            "example": "名前",
+            "exampleRomaji": "namae",
+            "examplePt": "nome"
+      },
+      {
+            "kanji": "生",
+            "reading": "せい / い",
+            "romaji": "sei / i",
+            "pt": "vida / nascer",
+            "example": "先生",
+            "exampleRomaji": "sensei",
+            "examplePt": "professor"
+      },
+      {
+            "kanji": "五",
+            "reading": "ご / いつ",
+            "romaji": "go / itsu",
+            "pt": "cinco",
+            "example": "五つ",
+            "exampleRomaji": "itsutsu",
+            "examplePt": "cinco itens"
+      },
+      {
+            "kanji": "間",
+            "reading": "かん / あいだ",
+            "romaji": "kan / aida",
+            "pt": "intervalo / espaço",
+            "example": "時間",
+            "exampleRomaji": "jikan",
+            "examplePt": "tempo"
+      },
+      {
+            "kanji": "上",
+            "reading": "じょう / うえ",
+            "romaji": "jou / ue",
+            "pt": "cima",
+            "example": "上",
+            "exampleRomaji": "ue",
+            "examplePt": "em cima"
+      },
+      {
+            "kanji": "東",
+            "reading": "とう / ひがし",
+            "romaji": "tou / higashi",
+            "pt": "leste",
+            "example": "東京",
+            "exampleRomaji": "Toukyou",
+            "examplePt": "Tóquio"
+      },
+      {
+            "kanji": "四",
+            "reading": "し / よん",
+            "romaji": "shi / yon",
+            "pt": "quatro",
+            "example": "四月",
+            "exampleRomaji": "shigatsu",
+            "examplePt": "abril"
+      },
+      {
+            "kanji": "今",
+            "reading": "こん / いま",
+            "romaji": "kon / ima",
+            "pt": "agora",
+            "example": "今",
+            "exampleRomaji": "ima",
+            "examplePt": "agora"
+      },
+      {
+            "kanji": "金",
+            "reading": "きん / かね",
+            "romaji": "kin / kane",
+            "pt": "ouro / dinheiro",
+            "example": "お金",
+            "exampleRomaji": "okane",
+            "examplePt": "dinheiro"
+      },
+      {
+            "kanji": "九",
+            "reading": "きゅう / ここの",
+            "romaji": "kyuu / kokono",
+            "pt": "nove",
+            "example": "九つ",
+            "exampleRomaji": "kokonotsu",
+            "examplePt": "nove itens"
+      },
+      {
+            "kanji": "入",
+            "reading": "にゅう / はい",
+            "romaji": "nyuu / hai",
+            "pt": "entrar",
+            "example": "入口",
+            "exampleRomaji": "iriguchi",
+            "examplePt": "entrada"
+      },
+      {
+            "kanji": "学",
+            "reading": "がく / まな",
+            "romaji": "gaku / mana",
+            "pt": "estudo",
+            "example": "学生",
+            "exampleRomaji": "gakusei",
+            "examplePt": "estudante"
+      },
+      {
+            "kanji": "高",
+            "reading": "こう / たか",
+            "romaji": "kou / taka",
+            "pt": "alto / caro",
+            "example": "高い",
+            "exampleRomaji": "takai",
+            "examplePt": "alto / caro"
+      },
+      {
+            "kanji": "円",
+            "reading": "えん / まる",
+            "romaji": "en / maru",
+            "pt": "iene / círculo",
+            "example": "百円",
+            "exampleRomaji": "hyakuen",
+            "examplePt": "100 ienes"
+      },
+      {
+            "kanji": "子",
+            "reading": "し / こ",
+            "romaji": "shi / ko",
+            "pt": "criança",
+            "example": "子ども",
+            "exampleRomaji": "kodomo",
+            "examplePt": "criança"
+      },
+      {
+            "kanji": "外",
+            "reading": "がい / そと",
+            "romaji": "gai / soto",
+            "pt": "fora",
+            "example": "外国",
+            "exampleRomaji": "gaikoku",
+            "examplePt": "país estrangeiro"
+      },
+      {
+            "kanji": "八",
+            "reading": "はち / やっ",
+            "romaji": "hachi / ya",
+            "pt": "oito",
+            "example": "八つ",
+            "exampleRomaji": "yattsu",
+            "examplePt": "oito itens"
+      },
+      {
+            "kanji": "六",
+            "reading": "ろく / むっ",
+            "romaji": "roku / mu",
+            "pt": "seis",
+            "example": "六つ",
+            "exampleRomaji": "muttsu",
+            "examplePt": "seis itens"
+      },
+      {
+            "kanji": "下",
+            "reading": "か / した",
+            "romaji": "ka / shita",
+            "pt": "baixo",
+            "example": "下",
+            "exampleRomaji": "shita",
+            "examplePt": "embaixo"
+      },
+      {
+            "kanji": "来",
+            "reading": "らい / く",
+            "romaji": "rai / ku",
+            "pt": "vir",
+            "example": "来ます",
+            "exampleRomaji": "kimasu",
+            "examplePt": "venho / vem"
+      },
+      {
+            "kanji": "気",
+            "reading": "き",
+            "romaji": "ki",
+            "pt": "energia / espírito",
+            "example": "元気",
+            "exampleRomaji": "genki",
+            "examplePt": "bem / saudável"
+      },
+      {
+            "kanji": "小",
+            "reading": "しょう / ちい",
+            "romaji": "shou / chii",
+            "pt": "pequeno",
+            "example": "小さい",
+            "exampleRomaji": "chiisai",
+            "examplePt": "pequeno"
+      },
+      {
+            "kanji": "七",
+            "reading": "しち / なな",
+            "romaji": "shichi / nana",
+            "pt": "sete",
+            "example": "七つ",
+            "exampleRomaji": "nanatsu",
+            "examplePt": "sete itens"
+      },
+      {
+            "kanji": "山",
+            "reading": "さん / やま",
+            "romaji": "san / yama",
+            "pt": "montanha",
+            "example": "山",
+            "exampleRomaji": "yama",
+            "examplePt": "montanha"
+      },
+      {
+            "kanji": "話",
+            "reading": "わ / はな",
+            "romaji": "wa / hana",
+            "pt": "falar / história",
+            "example": "話します",
+            "exampleRomaji": "hanashimasu",
+            "examplePt": "falo"
+      },
+      {
+            "kanji": "女",
+            "reading": "じょ / おんな",
+            "romaji": "jo / onna",
+            "pt": "mulher",
+            "example": "女の人",
+            "exampleRomaji": "onna no hito",
+            "examplePt": "mulher"
+      },
+      {
+            "kanji": "北",
+            "reading": "ほく / きた",
+            "romaji": "hoku / kita",
+            "pt": "norte",
+            "example": "北",
+            "exampleRomaji": "kita",
+            "examplePt": "norte"
+      },
+      {
+            "kanji": "午",
+            "reading": "ご",
+            "romaji": "go",
+            "pt": "meio-dia",
+            "example": "午前",
+            "exampleRomaji": "gozen",
+            "examplePt": "manhã / AM"
+      },
+      {
+            "kanji": "百",
+            "reading": "ひゃく",
+            "romaji": "hyaku",
+            "pt": "cem",
+            "example": "百円",
+            "exampleRomaji": "hyakuen",
+            "examplePt": "100 ienes"
+      },
+      {
+            "kanji": "書",
+            "reading": "しょ / か",
+            "romaji": "sho / ka",
+            "pt": "escrever",
+            "example": "書きます",
+            "exampleRomaji": "kakimasu",
+            "examplePt": "escrevo"
+      },
+      {
+            "kanji": "先",
+            "reading": "せん / さき",
+            "romaji": "sen / saki",
+            "pt": "antes / anterior",
+            "example": "先生",
+            "exampleRomaji": "sensei",
+            "examplePt": "professor"
+      },
+      {
+            "kanji": "名",
+            "reading": "めい / な",
+            "romaji": "mei / na",
+            "pt": "nome",
+            "example": "名前",
+            "exampleRomaji": "namae",
+            "examplePt": "nome"
+      },
+      {
+            "kanji": "川",
+            "reading": "せん / かわ",
+            "romaji": "sen / kawa",
+            "pt": "rio",
+            "example": "川",
+            "exampleRomaji": "kawa",
+            "examplePt": "rio"
+      },
+      {
+            "kanji": "千",
+            "reading": "せん",
+            "romaji": "sen",
+            "pt": "mil",
+            "example": "千円",
+            "exampleRomaji": "senen",
+            "examplePt": "1000 ienes"
+      },
+      {
+            "kanji": "水",
+            "reading": "すい / みず",
+            "romaji": "sui / mizu",
+            "pt": "água",
+            "example": "水",
+            "exampleRomaji": "mizu",
+            "examplePt": "água"
+      },
+      {
+            "kanji": "半",
+            "reading": "はん / なか",
+            "romaji": "han / naka",
+            "pt": "metade",
+            "example": "半分",
+            "exampleRomaji": "hanbun",
+            "examplePt": "metade"
+      },
+      {
+            "kanji": "男",
+            "reading": "だん / おとこ",
+            "romaji": "dan / otoko",
+            "pt": "homem",
+            "example": "男の人",
+            "exampleRomaji": "otoko no hito",
+            "examplePt": "homem"
+      },
+      {
+            "kanji": "西",
+            "reading": "せい / にし",
+            "romaji": "sei / nishi",
+            "pt": "oeste",
+            "example": "西",
+            "exampleRomaji": "nishi",
+            "examplePt": "oeste"
+      },
+      {
+            "kanji": "電",
+            "reading": "でん",
+            "romaji": "den",
+            "pt": "eletricidade",
+            "example": "電車",
+            "exampleRomaji": "densha",
+            "examplePt": "trem"
+      },
+      {
+            "kanji": "校",
+            "reading": "こう",
+            "romaji": "kou",
+            "pt": "escola",
+            "example": "学校",
+            "exampleRomaji": "gakkou",
+            "examplePt": "escola"
+      },
+      {
+            "kanji": "語",
+            "reading": "ご / かた",
+            "romaji": "go / kata",
+            "pt": "idioma / palavra",
+            "example": "日本語",
+            "exampleRomaji": "nihongo",
+            "examplePt": "japonês"
+      },
+      {
+            "kanji": "土",
+            "reading": "ど / つち",
+            "romaji": "do / tsuchi",
+            "pt": "terra / sábado",
+            "example": "土曜日",
+            "exampleRomaji": "doyoubi",
+            "examplePt": "sábado"
+      },
+      {
+            "kanji": "木",
+            "reading": "もく / き",
+            "romaji": "moku / ki",
+            "pt": "árvore / madeira",
+            "example": "木",
+            "exampleRomaji": "ki",
+            "examplePt": "árvore"
+      },
+      {
+            "kanji": "聞",
+            "reading": "ぶん / き",
+            "romaji": "bun / ki",
+            "pt": "ouvir / perguntar",
+            "example": "聞きます",
+            "exampleRomaji": "kikimasu",
+            "examplePt": "ouço / pergunto"
+      },
+      {
+            "kanji": "食",
+            "reading": "しょく / た",
+            "romaji": "shoku / ta",
+            "pt": "comer",
+            "example": "食べます",
+            "exampleRomaji": "tabemasu",
+            "examplePt": "como"
+      },
+      {
+            "kanji": "車",
+            "reading": "しゃ / くるま",
+            "romaji": "sha / kuruma",
+            "pt": "carro",
+            "example": "車",
+            "exampleRomaji": "kuruma",
+            "examplePt": "carro"
+      },
+      {
+            "kanji": "何",
+            "reading": "か / なに",
+            "romaji": "ka / nani",
+            "pt": "o quê",
+            "example": "何ですか",
+            "exampleRomaji": "nan desu ka",
+            "examplePt": "o que é?"
+      },
+      {
+            "kanji": "南",
+            "reading": "なん / みなみ",
+            "romaji": "nan / minami",
+            "pt": "sul",
+            "example": "南",
+            "exampleRomaji": "minami",
+            "examplePt": "sul"
+      },
+      {
+            "kanji": "万",
+            "reading": "まん",
+            "romaji": "man",
+            "pt": "dez mil",
+            "example": "一万円",
+            "exampleRomaji": "ichimanen",
+            "examplePt": "10.000 ienes"
+      },
+      {
+            "kanji": "毎",
+            "reading": "まい",
+            "romaji": "mai",
+            "pt": "todo / cada",
+            "example": "毎日",
+            "exampleRomaji": "mainichi",
+            "examplePt": "todos os dias"
+      },
+      {
+            "kanji": "白",
+            "reading": "はく / しろ",
+            "romaji": "haku / shiro",
+            "pt": "branco",
+            "example": "白い",
+            "exampleRomaji": "shiroi",
+            "examplePt": "branco"
+      },
+      {
+            "kanji": "天",
+            "reading": "てん / あめ",
+            "romaji": "ten / ame",
+            "pt": "céu",
+            "example": "天気",
+            "exampleRomaji": "tenki",
+            "examplePt": "clima"
+      },
+      {
+            "kanji": "母",
+            "reading": "ぼ / はは",
+            "romaji": "bo / haha",
+            "pt": "mãe",
+            "example": "母",
+            "exampleRomaji": "haha",
+            "examplePt": "minha mãe"
+      },
+      {
+            "kanji": "火",
+            "reading": "か / ひ",
+            "romaji": "ka / hi",
+            "pt": "fogo",
+            "example": "火曜日",
+            "exampleRomaji": "kayoubi",
+            "examplePt": "terça-feira"
+      },
+      {
+            "kanji": "右",
+            "reading": "う / みぎ",
+            "romaji": "u / migi",
+            "pt": "direita",
+            "example": "右",
+            "exampleRomaji": "migi",
+            "examplePt": "direita"
+      },
+      {
+            "kanji": "読",
+            "reading": "どく / よ",
+            "romaji": "doku / yo",
+            "pt": "ler",
+            "example": "読みます",
+            "exampleRomaji": "yomimasu",
+            "examplePt": "leio"
+      },
+      {
+            "kanji": "友",
+            "reading": "ゆう / とも",
+            "romaji": "yuu / tomo",
+            "pt": "amigo",
+            "example": "友だち",
+            "exampleRomaji": "tomodachi",
+            "examplePt": "amigo"
+      },
+      {
+            "kanji": "左",
+            "reading": "さ / ひだり",
+            "romaji": "sa / hidari",
+            "pt": "esquerda",
+            "example": "左",
+            "exampleRomaji": "hidari",
+            "examplePt": "esquerda"
+      },
+      {
+            "kanji": "休",
+            "reading": "きゅう / やす",
+            "romaji": "kyuu / yasu",
+            "pt": "descansar",
+            "example": "休み",
+            "exampleRomaji": "yasumi",
+            "examplePt": "descanso / folga"
+      },
+      {
+            "kanji": "父",
+            "reading": "ふ / ちち",
+            "romaji": "fu / chichi",
+            "pt": "pai",
+            "example": "父",
+            "exampleRomaji": "chichi",
+            "examplePt": "meu pai"
+      },
+      {
+            "kanji": "雨",
+            "reading": "う / あめ",
+            "romaji": "u / ame",
+            "pt": "chuva",
+            "example": "雨",
+            "exampleRomaji": "ame",
+            "examplePt": "chuva"
+      },
+      {
+            "kanji": "店",
+            "reading": "てん / みせ",
+            "romaji": "ten / mise",
+            "pt": "loja",
+            "example": "店",
+            "exampleRomaji": "mise",
+            "examplePt": "loja"
+      },
+      {
+            "kanji": "駅",
+            "reading": "えき",
+            "romaji": "eki",
+            "pt": "estação",
+            "example": "駅",
+            "exampleRomaji": "eki",
+            "examplePt": "estação"
+      },
+      {
+            "kanji": "道",
+            "reading": "どう / みち",
+            "romaji": "dou / michi",
+            "pt": "caminho / rua",
+            "example": "道",
+            "exampleRomaji": "michi",
+            "examplePt": "caminho"
+      },
+      {
+            "kanji": "少",
+            "reading": "しょう / すこ",
+            "romaji": "shou / suko",
+            "pt": "pouco",
+            "example": "少し",
+            "exampleRomaji": "sukoshi",
+            "examplePt": "um pouco"
+      },
+      {
+            "kanji": "古",
+            "reading": "こ / ふる",
+            "romaji": "ko / furu",
+            "pt": "antigo / velho",
+            "example": "古い",
+            "exampleRomaji": "furui",
+            "examplePt": "velho"
+      },
+      {
+            "kanji": "早",
+            "reading": "そう / はや",
+            "romaji": "sou / haya",
+            "pt": "cedo / rápido",
+            "example": "早い",
+            "exampleRomaji": "hayai",
+            "examplePt": "cedo / rápido"
+      },
+      {
+            "kanji": "体",
+            "reading": "たい / からだ",
+            "romaji": "tai / karada",
+            "pt": "corpo",
+            "example": "体",
+            "exampleRomaji": "karada",
+            "examplePt": "corpo"
+      },
+      {
+            "kanji": "社",
+            "reading": "しゃ",
+            "romaji": "sha",
+            "pt": "empresa / santuário",
+            "example": "会社",
+            "exampleRomaji": "kaisha",
+            "examplePt": "empresa"
+      },
+      {
+            "kanji": "空",
+            "reading": "くう / そら",
+            "romaji": "kuu / sora",
+            "pt": "céu / vazio",
+            "example": "空",
+            "exampleRomaji": "sora",
+            "examplePt": "céu"
+      },
+      {
+            "kanji": "花",
+            "reading": "か / はな",
+            "romaji": "ka / hana",
+            "pt": "flor",
+            "example": "花",
+            "exampleRomaji": "hana",
+            "examplePt": "flor"
+      },
+      {
+            "kanji": "音",
+            "reading": "おん / おと",
+            "romaji": "on / oto",
+            "pt": "som",
+            "example": "音",
+            "exampleRomaji": "oto",
+            "examplePt": "som"
+      },
+      {
+            "kanji": "犬",
+            "reading": "けん / いぬ",
+            "romaji": "ken / inu",
+            "pt": "cachorro",
+            "example": "犬",
+            "exampleRomaji": "inu",
+            "examplePt": "cachorro"
+      },
+      {
+            "kanji": "目",
+            "reading": "もく / め",
+            "romaji": "moku / me",
+            "pt": "olho",
+            "example": "目",
+            "exampleRomaji": "me",
+            "examplePt": "olho"
+      },
+      {
+            "kanji": "耳",
+            "reading": "じ / みみ",
+            "romaji": "ji / mimi",
+            "pt": "orelha",
+            "example": "耳",
+            "exampleRomaji": "mimi",
+            "examplePt": "orelha"
+      },
+      {
+            "kanji": "口",
+            "reading": "こう / くち",
+            "romaji": "kou / kuchi",
+            "pt": "boca",
+            "example": "口",
+            "exampleRomaji": "kuchi",
+            "examplePt": "boca"
+      },
+      {
+            "kanji": "手",
+            "reading": "しゅ / て",
+            "romaji": "shu / te",
+            "pt": "mão",
+            "example": "手",
+            "exampleRomaji": "te",
+            "examplePt": "mão"
+      },
+      {
+            "kanji": "足",
+            "reading": "そく / あし",
+            "romaji": "soku / ashi",
+            "pt": "pé / perna",
+            "example": "足",
+            "exampleRomaji": "ashi",
+            "examplePt": "pé / perna"
+      },
+      {
+            "kanji": "力",
+            "reading": "りょく / ちから",
+            "romaji": "ryoku / chikara",
+            "pt": "força",
+            "example": "力",
+            "exampleRomaji": "chikara",
+            "examplePt": "força"
+      },
+      {
+            "kanji": "立",
+            "reading": "りつ / た",
+            "romaji": "ritsu / ta",
+            "pt": "ficar de pé",
+            "example": "立ちます",
+            "exampleRomaji": "tachimasu",
+            "examplePt": "fico de pé"
+      },
+      {
+            "kanji": "正",
+            "reading": "せい / ただ",
+            "romaji": "sei / tada",
+            "pt": "correto",
+            "example": "正しい",
+            "exampleRomaji": "tadashii",
+            "examplePt": "correto"
+      },
+      {
+            "kanji": "文",
+            "reading": "ぶん",
+            "romaji": "bun",
+            "pt": "frase / texto",
+            "example": "文",
+            "exampleRomaji": "bun",
+            "examplePt": "frase"
+      }
+];
+
+    const quizQuestions = [
+      {
+            "q": "四月に、わたしはにほんにいきたいです。",
+            "prompt": "Qual é a leitura correta do kanji destacado?",
+            "options": [
+                  "しがつ",
+                  "よんがつ",
+                  "よがつ",
+                  "よっがつ"
+            ],
+            "answer": 0,
+            "qHtml": "<span class=\"kanjiTarget\">四月</span>に、わたしはにほんにいきたいです。"
+      },
+      {
+            "q": "質問があります。",
+            "prompt": "Qual é a leitura correta do kanji destacado?",
+            "options": [
+                  "こたえ",
+                  "しつもん",
+                  "もんく",
+                  "しすもん"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">質問</span>があります。"
+      },
+      {
+            "q": "このカバンは三千円です。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "さんまんえん",
+                  "さんびゃくえん",
+                  "さんせんえん",
+                  "さんぜんえん"
+            ],
+            "answer": 2,
+            "qHtml": "このカバンは<span class=\"kanjiTarget\">三千円</span>です。"
+      },
+      {
+            "q": "毎日、がっこうへいきます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "まいにち",
+                  "うみにち",
+                  "まいしゅう",
+                  "まいばん"
+            ],
+            "answer": 0,
+            "qHtml": "<span class=\"kanjiTarget\">毎日</span>、がっこうへいきます。"
+      },
+      {
+            "q": "外国語をべんきょうしたいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "そとこくご",
+                  "そとくにご",
+                  "がいこくご",
+                  "がいこくこ"
+            ],
+            "answer": 2,
+            "qHtml": "<span class=\"kanjiTarget\">外国語</span>をべんきょうしたいです。"
+      },
+      {
+            "q": "きょうは休みです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "やすみ",
+                  "からだみ",
+                  "きみ",
+                  "やみ"
+            ],
+            "answer": 0,
+            "qHtml": "きょうは<span class=\"kanjiTarget\">休み</span>です。"
+      },
+      {
+            "q": "まいばん、ぎゅうにゅうを飲みます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "たべみます",
+                  "のみます",
+                  "きみます",
+                  "みみます"
+            ],
+            "answer": 1,
+            "qHtml": "まいばん、ぎゅうにゅうを<span class=\"kanjiTarget\">飲みます</span>。"
+      },
+      {
+            "q": "あしたは月よう日です。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "げつようび",
+                  "かようび",
+                  "もくようび",
+                  "どようび"
+            ],
+            "answer": 0,
+            "qHtml": "あしたは<span class=\"kanjiTarget\">月よう日</span>です。"
+      },
+      {
+            "q": "わたしは日本人です。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "にほんひと",
+                  "にほんびと",
+                  "びほんびと",
+                  "にほんじん"
+            ],
+            "answer": 3,
+            "qHtml": "わたしは<span class=\"kanjiTarget\">日本人</span>です。"
+      },
+      {
+            "q": "今年２５さいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ことし",
+                  "こんねん",
+                  "きょねん",
+                  "らいねん"
+            ],
+            "answer": 0,
+            "qHtml": "<span class=\"kanjiTarget\">今年</span>２５さいです。"
+      },
+      {
+            "q": "このへやは大きいですね。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "だいきい",
+                  "おおきい",
+                  "おきい",
+                  "おいきい"
+            ],
+            "answer": 1,
+            "qHtml": "このへやは<span class=\"kanjiTarget\">大きい</span>ですね。"
+      },
+      {
+            "q": "このなかに水をいれてください。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "みず",
+                  "すい",
+                  "すえ",
+                  "よっ"
+            ],
+            "answer": 0,
+            "qHtml": "このなかに<span class=\"kanjiTarget\">水</span>をいれてください。"
+      },
+      {
+            "q": "きのう、本をかいました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ほん",
+                  "き",
+                  "ぼん",
+                  "ぽん"
+            ],
+            "answer": 0,
+            "qHtml": "きのう、<span class=\"kanjiTarget\">本</span>をかいました。"
+      },
+      {
+            "q": "この花のなまえをしっていますか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "はな",
+                  "ばな",
+                  "き",
+                  "くさ"
+            ],
+            "answer": 0,
+            "qHtml": "この<span class=\"kanjiTarget\">花</span>のなまえをしっていますか。"
+      },
+      {
+            "q": "先月、いえへかえりました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "せんがつ",
+                  "せんげつ",
+                  "せんつき",
+                  "らいつき"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">先月</span>、いえへかえりました。"
+      },
+      {
+            "q": "りょうりを作っています。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "さくって",
+                  "ざくって",
+                  "きって",
+                  "つくって"
+            ],
+            "answer": 3,
+            "qHtml": "りょうりを<span class=\"kanjiTarget\">作っています</span>。"
+      },
+      {
+            "q": "えきの出口はどちらですか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "でぐち",
+                  "でくち",
+                  "でこう",
+                  "てくち"
+            ],
+            "answer": 0,
+            "qHtml": "えきの<span class=\"kanjiTarget\">出口</span>はどちらですか。"
+      },
+      {
+            "q": "アイスクリームを四つください。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "よんつ",
+                  "よつ",
+                  "よっつ",
+                  "ふたつ"
+            ],
+            "answer": 2,
+            "qHtml": "アイスクリームを<span class=\"kanjiTarget\">四つ</span>ください。"
+      },
+      {
+            "q": "きのうのよるから手がいたいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "て",
+                  "あし",
+                  "おなか",
+                  "あたま"
+            ],
+            "answer": 0,
+            "qHtml": "きのうのよるから<span class=\"kanjiTarget\">手</span>がいたいです。"
+      },
+      {
+            "q": "がっこうは何時からですか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "なにじかん",
+                  "ばんし",
+                  "なにじ",
+                  "なんじ"
+            ],
+            "answer": 3,
+            "qHtml": "がっこうは<span class=\"kanjiTarget\">何時</span>からですか。"
+      },
+      {
+            "q": "としょかんでにほんごのほんを読みます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "やみます",
+                  "やすみます",
+                  "よみます",
+                  "よすみます"
+            ],
+            "answer": 2,
+            "qHtml": "としょかんでにほんごのほんを<span class=\"kanjiTarget\">読みます</span>。"
+      },
+      {
+            "q": "あのひとはとても有名です。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ゆうな",
+                  "みぎめい",
+                  "ゆうめい",
+                  "ゆうめ"
+            ],
+            "answer": 2,
+            "qHtml": "あのひとはとても<span class=\"kanjiTarget\">有名</span>です。"
+      },
+      {
+            "q": "つくえの下にねこがいます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "うえ",
+                  "した",
+                  "そと",
+                  "なか"
+            ],
+            "answer": 1,
+            "qHtml": "つくえの<span class=\"kanjiTarget\">下</span>にねこがいます。"
+      },
+      {
+            "q": "このうわぎは八千円です。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "はちせんえん",
+                  "はちまんえん",
+                  "はちぜんえん",
+                  "はっせんえん"
+            ],
+            "answer": 0,
+            "qHtml": "このうわぎは<span class=\"kanjiTarget\">八千円</span>です。"
+      },
+      {
+            "q": "このホテルはへやが多いです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "すくない",
+                  "せまい",
+                  "おおい",
+                  "ひろい"
+            ],
+            "answer": 2,
+            "qHtml": "このホテルはへやが<span class=\"kanjiTarget\">多い</span>です。"
+      },
+      {
+            "q": "ごはんの後でさんぽします。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "あと",
+                  "まえ",
+                  "うしろ",
+                  "うみ"
+            ],
+            "answer": 0,
+            "qHtml": "ごはんの<span class=\"kanjiTarget\">後</span>でさんぽします。"
+      },
+      {
+            "q": "ちかくに山があります。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "うみ",
+                  "かわ",
+                  "やま",
+                  "しま"
+            ],
+            "answer": 2,
+            "qHtml": "ちかくに<span class=\"kanjiTarget\">山</span>があります。"
+      },
+      {
+            "q": "ともだちといっしょに学校にいきます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "がっこう",
+                  "がくこう",
+                  "がこう",
+                  "がっこ"
+            ],
+            "answer": 0,
+            "qHtml": "ともだちといっしょに<span class=\"kanjiTarget\">学校</span>にいきます。"
+      },
+      {
+            "q": "この新聞はいくらですか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ざっし",
+                  "しんぶん",
+                  "しむん",
+                  "しぶん"
+            ],
+            "answer": 1,
+            "qHtml": "この<span class=\"kanjiTarget\">新聞</span>はいくらですか。"
+      },
+      {
+            "q": "このカメラは安いです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "たかい",
+                  "やすい",
+                  "あんい",
+                  "おなのい"
+            ],
+            "answer": 1,
+            "qHtml": "このカメラは<span class=\"kanjiTarget\">安い</span>です。"
+      },
+      {
+            "q": "あの先生はわかいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "せんせい",
+                  "がくせい",
+                  "さきせい",
+                  "さきなま"
+            ],
+            "answer": 0,
+            "qHtml": "あの<span class=\"kanjiTarget\">先生</span>はわかいです。"
+      },
+      {
+            "q": "すみません、お金をわすれました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "おきん",
+                  "おぎん",
+                  "おがね",
+                  "おかね"
+            ],
+            "answer": 3,
+            "qHtml": "すみません、<span class=\"kanjiTarget\">お金</span>をわすれました。"
+      },
+      {
+            "q": "右がわにとしょかんがあります。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ひだり",
+                  "みぎ",
+                  "みき",
+                  "ひたり"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">右</span>がわにとしょかんがあります。"
+      },
+      {
+            "q": "まいにち、電車でがっこうへいきます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "しんかんせん",
+                  "じどうしゃ",
+                  "でんしゃ",
+                  "でんじゃ"
+            ],
+            "answer": 2,
+            "qHtml": "まいにち、<span class=\"kanjiTarget\">電車</span>でがっこうへいきます。"
+      },
+      {
+            "q": "このクラスは女の子がおおいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "おんなのこ",
+                  "おなのこ",
+                  "おなのこう",
+                  "おなのこ"
+            ],
+            "answer": 0,
+            "qHtml": "このクラスは<span class=\"kanjiTarget\">女の子</span>がおおいです。"
+      },
+      {
+            "q": "すみません、もっと長いコートはありませんか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "みじかい",
+                  "たかい",
+                  "ひろい",
+                  "ながい"
+            ],
+            "answer": 3,
+            "qHtml": "すみません、もっと<span class=\"kanjiTarget\">長い</span>コートはありませんか。"
+      },
+      {
+            "q": "にほんでは、しがつに入学します。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "はいがく",
+                  "いりがく",
+                  "にゅうがく",
+                  "おとおさん"
+            ],
+            "answer": 2,
+            "qHtml": "にほんでは、しがつに<span class=\"kanjiTarget\">入学</span>します。"
+      },
+      {
+            "q": "来週、わたしはアメリカへしゅっちょうします。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "しょうらい",
+                  "らいしゅう",
+                  "こんしゅう",
+                  "せんしゅう"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">来週</span>、わたしはアメリカへしゅっちょうします。"
+      },
+      {
+            "q": "にほんごを話します。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "わします",
+                  "はなします",
+                  "かいわします",
+                  "でんわします"
+            ],
+            "answer": 1,
+            "qHtml": "にほんごを<span class=\"kanjiTarget\">話します</span>。"
+      },
+      {
+            "q": "このしごとは時間がかかります。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "じかん",
+                  "じがん",
+                  "しかん",
+                  "じっがん"
+            ],
+            "answer": 0,
+            "qHtml": "このしごとは<span class=\"kanjiTarget\">時間</span>がかかります。"
+      },
+      {
+            "q": "心配しないでください。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "しんばい",
+                  "しんぱい",
+                  "こころぱい",
+                  "こころばい"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">心配</span>しないでください。"
+      },
+      {
+            "q": "景色のいいところへいきたい。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "けいしき",
+                  "けしき",
+                  "けいろ",
+                  "けいいろ"
+            ],
+            "answer": 1,
+            "qHtml": "<span class=\"kanjiTarget\">景色</span>のいいところへいきたい。"
+      },
+      {
+            "q": "あした、雨がふります。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "かさ",
+                  "あめ",
+                  "ゆき",
+                  "うみ"
+            ],
+            "answer": 1,
+            "qHtml": "あした、<span class=\"kanjiTarget\">雨</span>がふります。"
+      },
+      {
+            "q": "わたしは医者になりたいです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "いさ",
+                  "はいしゃ",
+                  "いしゃ",
+                  "いじゃ"
+            ],
+            "answer": 2,
+            "qHtml": "わたしは<span class=\"kanjiTarget\">医者</span>になりたいです。"
+      },
+      {
+            "q": "去年、わたしはとうきょうへいきました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "ことし",
+                  "らいねん",
+                  "きょねん",
+                  "きょうねん"
+            ],
+            "answer": 2,
+            "qHtml": "<span class=\"kanjiTarget\">去年</span>、わたしはとうきょうへいきました。"
+      },
+      {
+            "q": "さいきん、目がわるくなりました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "て",
+                  "あし",
+                  "め",
+                  "くち"
+            ],
+            "answer": 2,
+            "qHtml": "さいきん、<span class=\"kanjiTarget\">目</span>がわるくなりました。"
+      },
+      {
+            "q": "今朝、6じにおきました。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "きょう",
+                  "あした",
+                  "けさ",
+                  "こんさ"
+            ],
+            "answer": 2,
+            "qHtml": "<span class=\"kanjiTarget\">今朝</span>、6じにおきました。"
+      },
+      {
+            "q": "なにを食べますか。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "たべます",
+                  "のみべます",
+                  "しょくべます",
+                  "だべます"
+            ],
+            "answer": 0,
+            "qHtml": "なにを<span class=\"kanjiTarget\">食べます</span>か。"
+      },
+      {
+            "q": "らいげつ、友だちがにほんにあそびに来ます。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "とむだち",
+                  "とみだち",
+                  "ともだち",
+                  "とびだち"
+            ],
+            "answer": 2,
+            "qHtml": "らいげつ、<span class=\"kanjiTarget\">友だち</span>がにほんにあそびに来ます。"
+      },
+      {
+            "q": "がっこうは九月八日からです。",
+            "prompt": "Qual é a leitura correta?",
+            "options": [
+                  "くがつはちか",
+                  "きゅうがつよっか",
+                  "きゅうがつはちか",
+                  "くがつようか"
+            ],
+            "answer": 3,
+            "qHtml": "がっこうは<span class=\"kanjiTarget\">九月八日</span>からです。"
+      }
+];
+
+    const grid = document.getElementById("cardGrid");
+    const emptyMessage = document.getElementById("emptyMessage");
+    let currentCards = [...flashcards];
+
+    function renderCards(cards) {
+      grid.innerHTML = "";
+      emptyMessage.style.display = cards.length ? "none" : "block";
+
+      cards.forEach((card) => {
+        const article = document.createElement("article");
+        article.className = "card";
+        article.innerHTML = `
+          <div class="inner">
+            <div class="face front">
+              <div class="number">#${String(flashcards.indexOf(card) + 1).padStart(3, "0")}</div>
+              <div class="kanji">${card.kanji}</div>
+              <div class="hint">Clique para ver a resposta</div>
+            </div>
+            <div class="face back">
+              <div>
+                <div class="romaji">${card.romaji}</div>
+                <div class="reading">${card.reading}</div>
+              </div>
+              <div class="meaning">${card.pt}</div>
+              <div class="example">
+                ${card.example}<br>
+                <strong>${card.exampleRomaji}</strong><br>
+                ${card.examplePt}
+              </div>
+            </div>
+          </div>
+        `;
+        article.addEventListener("click", () => {
+          article.classList.toggle("flipped");
+        });
+        grid.appendChild(article);
+      });
+    }
+
+    function setActiveMenu(buttonText) {
+      document.querySelectorAll(".menu-item").forEach(item => {
+        item.classList.toggle("active", item.textContent.trim().toLowerCase() === buttonText.toLowerCase());
+      });
+      updateActiveIndicator();
+    }
+
+    function setActiveSubmenu(buttonText) {
+      document.querySelectorAll(".sub-item").forEach(item => {
+        item.classList.toggle("active", item.textContent.trim().toLowerCase() === buttonText.toLowerCase());
+      });
+    }
+
+    function updateActiveIndicator() {
+      const bar = document.getElementById("menuBar");
+      const active = document.querySelector(".menu-item.active");
+      if (!bar || !active) return;
+      const barRect = bar.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      bar.style.setProperty("--active-left", `${activeRect.left - barRect.left + bar.scrollLeft}px`);
+      bar.style.setProperty("--active-width", `${activeRect.width}px`);
+    }
+
+    function showFlashCards() {
+      document.getElementById("homeSection").hidden = true;
+      document.getElementById("flashCardsSection").hidden = false;
+      document.getElementById("quizSection").hidden = true;
+      setActiveMenu("Flash Cards");
+      updateActiveIndicator();
+    }
+
+    function showQuiz() {
+      document.getElementById("homeSection").hidden = true;
+      document.getElementById("flashCardsSection").hidden = true;
+      document.getElementById("quizSection").hidden = false;
+      setActiveMenu("Teste");
+      updateActiveIndicator();
+
+      if (!document.getElementById("quizGrid").children.length) {
+        renderQuiz();
+      }
+    }
+
+    function goHome() {
+      document.getElementById("flashCardsSection").hidden = true;
+      document.getElementById("quizSection").hidden = true;
+      document.getElementById("homeSection").hidden = false;
+      setActiveMenu("Home");
+      updateActiveIndicator();
+    }
+
+    function sortByNumber() {
+      showFlashCards();
+      currentCards = [...flashcards];
+      document.getElementById("searchInput").value = "";
+      renderCards(currentCards);
+      setActiveSubmenu("Número");
+    }
+
+    function shuffleCards() {
+      showFlashCards();
+      currentCards = [...currentCards].sort(() => Math.random() - 0.5);
+      renderCards(currentCards);
+      setActiveSubmenu("Embaralhar");
+    }
+
+    function resetCards() {
+      showFlashCards();
+      document.querySelectorAll(".card").forEach(card => {
+        card.classList.remove("flipped");
+      });
+      setActiveSubmenu("Virar todos");
+    }
+
+    function filterCards() {
+      showFlashCards();
+      const term = document.getElementById("searchInput").value.trim().toLowerCase();
+      currentCards = flashcards.filter(card => {
+        return [
+          card.kanji,
+          card.reading,
+          card.romaji,
+          card.pt,
+          card.example,
+          card.exampleRomaji,
+          card.examplePt
+        ].join(" ").toLowerCase().includes(term);
+      });
+      renderCards(currentCards);
+    }
+
+    function toggleSearch() {
+      const box = document.getElementById("searchBox");
+      const input = document.getElementById("searchInput");
+      box.classList.toggle("open");
+
+      if (box.classList.contains("open")) {
+        setTimeout(() => input.focus(), 160);
+      } else {
+        input.value = "";
+        sortByNumber();
+      }
+    }
+
+    function renderQuiz() {
+      const quizGrid = document.getElementById("quizGrid");
+      quizGrid.innerHTML = "";
+
+      quizQuestions.forEach((item, index) => {
+        const article = document.createElement("article");
+        article.className = "questionCard";
+        article.dataset.index = index;
+
+        const optionsHtml = item.options.map((option, optionIndex) => `
+          <label class="optionLabel">
+            <input type="radio" name="q${index}" value="${optionIndex}">
+            <span>${optionIndex + 1}. ${option}</span>
+          </label>
+        `).join("");
+
+        article.innerHTML = `
+          <div class="questionTop">
+            <span class="questionNumber">Q${String(index + 1).padStart(2, "0")}</span>
+            <span class="questionStatus">não respondida</span>
+          </div>
+          <div class="questionText">${item.qHtml || item.q}</div>
+          <div class="questionPrompt">${item.prompt}</div>
+          <div class="options">${optionsHtml}</div>
+          <div class="answerFeedback"></div>
+        `;
+
+        quizGrid.appendChild(article);
+      });
+    }
+
+    function checkQuiz() {
+      showQuiz();
+
+      let score = 0;
+
+      quizQuestions.forEach((item, index) => {
+        const card = document.querySelector(`.questionCard[data-index="${index}"]`);
+        const selected = document.querySelector(`input[name="q${index}"]:checked`);
+        const labels = card.querySelectorAll(".optionLabel");
+        const status = card.querySelector(".questionStatus");
+        const feedback = card.querySelector(".answerFeedback");
+
+        card.classList.remove("correct", "wrong");
+        labels.forEach(label => label.classList.remove("correctAnswer", "wrongAnswer"));
+
+        labels[item.answer].classList.add("correctAnswer");
+
+        if (selected && Number(selected.value) === item.answer) {
+          score++;
+          card.classList.add("correct");
+          status.textContent = "correta";
+          feedback.textContent = "Resposta correta.";
+        } else {
+          card.classList.add("wrong");
+          status.textContent = selected ? "errada" : "em branco";
+          if (selected) {
+            labels[Number(selected.value)].classList.add("wrongAnswer");
+          }
+          feedback.textContent = `Correta: ${item.options[item.answer]}`;
+        }
+      });
+
+      const scoreBox = document.getElementById("scoreBox");
+      const percent = Math.round((score / quizQuestions.length) * 100);
+      scoreBox.innerHTML = `<strong>${score}/${quizQuestions.length}</strong><span>${percent}% de acerto</span>`;
+
+      window.scrollTo({
+        top: document.getElementById("quizSection").offsetTop - 80,
+        behavior: "smooth"
+      });
+    }
+
+    function resetQuiz() {
+      showQuiz();
+
+      document.querySelectorAll(".questionCard").forEach(card => {
+        card.classList.remove("correct", "wrong");
+        card.querySelector(".questionStatus").textContent = "não respondida";
+        card.querySelector(".answerFeedback").textContent = "";
+        card.querySelectorAll(".optionLabel").forEach(label => {
+          label.classList.remove("correctAnswer", "wrongAnswer");
+        });
+        card.querySelectorAll("input").forEach(input => {
+          input.checked = false;
+        });
+      });
+
+      document.getElementById("scoreBox").innerHTML = `<strong>0/${quizQuestions.length}</strong><span>aguardando correção</span>`;
+    }
+
+    function updateCompactMenu() {
+      if (window.scrollY > 90) {
+        document.body.classList.add("scrolled");
+      } else {
+        document.body.classList.remove("scrolled");
+      }
+    }
+
+    window.addEventListener("scroll", () => {
+      updateCompactMenu();
+      updateActiveIndicator();
+    }, { passive: true });
+
+    window.addEventListener("resize", updateActiveIndicator);
+    window.addEventListener("load", updateActiveIndicator);
+
+    renderCards(currentCards);
+    renderQuiz();
+    updateCompactMenu();
+    updateActiveIndicator();
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js");
+      });
+    }
+  </script>
+
+</body>
+</html>
