@@ -420,6 +420,7 @@
       background: var(--yellow);
       border-left: 1.8px solid var(--line);
       border-bottom: 1.8px solid var(--line);
+      z-index: 2;
     }
 
     .back {
@@ -445,13 +446,21 @@
 
     .number {
       position: absolute;
-      top: 18px;
-      right: 18px;
-      z-index: 2;
+      top: 0;
+      right: 0;
+      z-index: 5;
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--ink);
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 950;
-      letter-spacing: 0.1em;
+      letter-spacing: 0;
+      line-height: 1;
+      text-align: center;
+      pointer-events: none;
     }
 
     .kanji {
@@ -730,6 +739,150 @@
       line-height: 1.35;
     }
 
+    .resultSection {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .resultHero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: stretch;
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 7px 7px 0 var(--black);
+      padding: clamp(22px, 4vw, 42px);
+      margin-bottom: 24px;
+    }
+
+    .resultHero h2 {
+      font-size: clamp(36px, 6vw, 74px);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      margin: 14px 0;
+    }
+
+    .resultHero p {
+      color: var(--muted);
+      font-weight: 750;
+      line-height: 1.55;
+      max-width: 680px;
+    }
+
+    .resultSummary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .summaryCard {
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--black);
+      padding: 18px;
+    }
+
+    .summaryCard span {
+      display: block;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .summaryCard strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .resultList {
+      display: grid;
+      gap: 14px;
+    }
+
+    .resultItem {
+      border: 1.8px solid var(--line);
+      background: var(--white);
+      box-shadow: 4px 4px 0 var(--black);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .resultBadge {
+      min-width: 48px;
+      height: 48px;
+      border: 1.5px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      background: var(--yellow);
+    }
+
+    .resultItem.correct .resultBadge {
+      background: #E9F7E4;
+    }
+
+    .resultItem.wrong .resultBadge,
+    .resultItem.blank .resultBadge {
+      background: #FBE1DD;
+    }
+
+    .resultQuestion {
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .resultAnswers {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .resultAnswers strong {
+      color: var(--ink);
+    }
+
+    .resultStatus {
+      min-width: 84px;
+      text-align: center;
+      border: 1.5px solid var(--line);
+      padding: 9px 10px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .resultItem.correct .resultStatus {
+      background: #E9F7E4;
+      color: var(--ink);
+    }
+
+    .resultItem.wrong .resultStatus,
+    .resultItem.blank .resultStatus {
+      background: var(--red);
+      color: var(--white);
+    }
+
     .empty {
       width: min(760px, calc(100% - 36px));
       margin: 20px auto;
@@ -829,6 +982,18 @@
         min-width: 100%;
       }
 
+      .resultHero {
+        grid-template-columns: 1fr;
+      }
+
+      .resultItem {
+        grid-template-columns: 1fr;
+      }
+
+      .resultStatus {
+        width: fit-content;
+      }
+
       .sub-item {
         flex: 1 0 auto;
       }
@@ -851,13 +1016,27 @@
         padding: 16px 0 8px;
       }
     }
+
+    @media (max-width: 520px) {
+      .front::after {
+        width: 52px !important;
+        height: 52px !important;
+      }
+
+      .number {
+        top: 0 !important;
+        right: 0 !important;
+        width: 52px !important;
+        height: 52px !important;
+        font-size: 8px !important;
+        letter-spacing: -0.03em !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        transform: none !important;
+      }
+    }
+
   </style>
-
-  <meta name="theme-color" content="#171717" />
-  <meta name="description" content="Aplicativo de estudo de kanji JLPT N5 com flashcards e teste." />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-
 </head>
 <body>
   <header>
@@ -935,6 +1114,34 @@
       </div>
 
       <form class="quizGrid" id="quizGrid"></form>
+    </section>
+    <section class="resultSection" id="resultSection" hidden>
+      <div class="sectionTitle">
+        <div>
+          <span>RESULTADO</span>
+          <p>Resumo da prova com acertos, erros, respostas marcadas e respostas corretas.</p>
+        </div>
+
+        <div class="quizActions">
+          <button class="sub-item" type="button" onclick="showQuiz()">Voltar ao teste</button>
+          <button class="sub-item active" type="button" onclick="resetQuiz()">Refazer</button>
+        </div>
+      </div>
+
+      <div class="resultHero" id="resultHero">
+        <div>
+          <span class="homeLabel">KANJI SCORE</span>
+          <h2>Resultado da prova</h2>
+          <p>Corrija o teste para visualizar seu desempenho completo.</p>
+        </div>
+        <div class="scoreBox resultScore" id="resultScoreBox">
+          <strong>0/50</strong>
+          <span>sem correção</span>
+        </div>
+      </div>
+
+      <div class="resultSummary" id="resultSummary"></div>
+      <div class="resultList" id="resultList"></div>
     </section>
   </main>
 
@@ -2515,6 +2722,7 @@
       document.getElementById("homeSection").hidden = true;
       document.getElementById("flashCardsSection").hidden = false;
       document.getElementById("quizSection").hidden = true;
+      document.getElementById("resultSection").hidden = true;
       setActiveMenu("Flash Cards");
       updateActiveIndicator();
     }
@@ -2523,6 +2731,7 @@
       document.getElementById("homeSection").hidden = true;
       document.getElementById("flashCardsSection").hidden = true;
       document.getElementById("quizSection").hidden = false;
+      document.getElementById("resultSection").hidden = true;
       setActiveMenu("Teste");
       updateActiveIndicator();
 
@@ -2534,6 +2743,7 @@
     function goHome() {
       document.getElementById("flashCardsSection").hidden = true;
       document.getElementById("quizSection").hidden = true;
+      document.getElementById("resultSection").hidden = true;
       document.getElementById("homeSection").hidden = false;
       setActiveMenu("Home");
       updateActiveIndicator();
@@ -2623,10 +2833,59 @@
       });
     }
 
+    function showResultsPage() {
+      document.getElementById("homeSection").hidden = true;
+      document.getElementById("flashCardsSection").hidden = true;
+      document.getElementById("quizSection").hidden = true;
+      document.getElementById("resultSection").hidden = false;
+      setActiveMenu("Teste");
+      updateActiveIndicator();
+    }
+
+    function buildResults(score, details) {
+      const total = quizQuestions.length;
+      const wrong = details.filter(item => item.status === "wrong").length;
+      const blank = details.filter(item => item.status === "blank").length;
+      const percent = Math.round((score / total) * 100);
+
+      document.getElementById("resultScoreBox").innerHTML = `<strong>${score}/${total}</strong><span>${percent}% de acerto</span>`;
+
+      const resultHero = document.getElementById("resultHero");
+      resultHero.querySelector("p").textContent = `Você acertou ${score} de ${total} questões. Veja abaixo quais foram corretas, erradas ou deixadas em branco.`;
+
+      document.getElementById("resultSummary").innerHTML = `
+        <div class="summaryCard"><span>Acertos</span><strong>${score}</strong></div>
+        <div class="summaryCard"><span>Erros</span><strong>${wrong}</strong></div>
+        <div class="summaryCard"><span>Em branco</span><strong>${blank}</strong></div>
+        <div class="summaryCard"><span>Resultado</span><strong>${percent}%</strong></div>
+      `;
+
+      document.getElementById("resultList").innerHTML = details.map(item => {
+        const statusLabel = item.status === "correct" ? "correta" : item.status === "blank" ? "em branco" : "errada";
+        const userAnswer = item.userAnswer === null ? "Não respondida" : item.userAnswer;
+        return `
+          <article class="resultItem ${item.status}">
+            <div class="resultBadge">Q${String(item.index + 1).padStart(2, "0")}</div>
+            <div>
+              <div class="resultQuestion">${item.questionHtml}</div>
+              <div class="resultAnswers">
+                <div>Sua resposta: <strong>${userAnswer}</strong></div>
+                <div>Resposta correta: <strong>${item.correctAnswer}</strong></div>
+              </div>
+            </div>
+            <div class="resultStatus">${statusLabel}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
     function checkQuiz() {
-      showQuiz();
+      if (!document.getElementById("quizGrid").children.length) {
+        renderQuiz();
+      }
 
       let score = 0;
+      const details = [];
 
       quizQuestions.forEach((item, index) => {
         const card = document.querySelector(`.questionCard[data-index="${index}"]`);
@@ -2640,12 +2899,21 @@
 
         labels[item.answer].classList.add("correctAnswer");
 
+        let resultStatus = "blank";
+        let selectedText = null;
+
+        if (selected) {
+          selectedText = item.options[Number(selected.value)];
+        }
+
         if (selected && Number(selected.value) === item.answer) {
           score++;
+          resultStatus = "correct";
           card.classList.add("correct");
           status.textContent = "correta";
           feedback.textContent = "Resposta correta.";
         } else {
+          resultStatus = selected ? "wrong" : "blank";
           card.classList.add("wrong");
           status.textContent = selected ? "errada" : "em branco";
           if (selected) {
@@ -2653,14 +2921,25 @@
           }
           feedback.textContent = `Correta: ${item.options[item.answer]}`;
         }
+
+        details.push({
+          index,
+          status: resultStatus,
+          questionHtml: item.qHtml || item.q,
+          userAnswer: selectedText,
+          correctAnswer: item.options[item.answer]
+        });
       });
 
       const scoreBox = document.getElementById("scoreBox");
       const percent = Math.round((score / quizQuestions.length) * 100);
       scoreBox.innerHTML = `<strong>${score}/${quizQuestions.length}</strong><span>${percent}% de acerto</span>`;
 
+      buildResults(score, details);
+      showResultsPage();
+
       window.scrollTo({
-        top: document.getElementById("quizSection").offsetTop - 80,
+        top: document.getElementById("resultSection").offsetTop - 80,
         behavior: "smooth"
       });
     }
@@ -2681,6 +2960,9 @@
       });
 
       document.getElementById("scoreBox").innerHTML = `<strong>0/${quizQuestions.length}</strong><span>aguardando correção</span>`;
+      document.getElementById("resultScoreBox").innerHTML = `<strong>0/${quizQuestions.length}</strong><span>sem correção</span>`;
+      document.getElementById("resultSummary").innerHTML = "";
+      document.getElementById("resultList").innerHTML = "";
     }
 
     function updateCompactMenu() {
@@ -2704,14 +2986,5 @@
     updateCompactMenu();
     updateActiveIndicator();
   </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js");
-      });
-    }
-  </script>
-
 </body>
 </html>
